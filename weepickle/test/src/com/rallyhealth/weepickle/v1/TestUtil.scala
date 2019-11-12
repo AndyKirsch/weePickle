@@ -55,4 +55,14 @@ class TestUtil[Api <: com.rallyhealth.weepickle.v0.Api](val api: Api){
       assert(writtenBinaryStr == rewrittenBinaryStr)
     }
   }
+
+  def abuseCase[T: api.Reader](s: String*) = {
+    val strings = s.map(_.trim)
+
+    for (s <- strings) {
+      intercept[NumberFormatException] {
+        api.read[T](s)
+      }
+    }
+  }
 }
