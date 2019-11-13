@@ -132,7 +132,22 @@ trait DefaultReaders extends com.rallyhealth.weepickle.v0.core.Types with Genera
   }
   implicit val BigDecimalReader: Reader[BigDecimal] = new SimpleReader[BigDecimal] {
     override def expectedMsg = "expected number or numeric string"
-    override def visitString(s: CharSequence, index: Int) = BigDecimal(s.toString)
+    override def visitString(s: CharSequence, index: Int) = {
+      val str = s.toString
+      // two abuse cases: the exponential formatted one and the number as string case
+      val maxAllowableDigits = 54 // Based on the interoperability information contained in RFC-8259 section 6
+      val exponentialNotationIndex = str.indexOf('E') match {
+        case -1 => str.indexOf('e')
+        case n => n
+      }
+      // The +1 is for the e itself
+      if(exponentialNotationIndex != -1 && Integer.parseInt(str.drop(exponentialNotationIndex + 1)) >= maxAllowableDigits)
+        throw new NumberFormatException("Exponential")
+      val digitSplit = str.indexOf('.')
+      if(str.length - digitSplit >= maxAllowableDigits)
+        throw new NumberFormatException("Digits")
+      BigDecimal(str)
+    }
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int) = BigDecimal(s.toString)
     override def visitInt32(d: Int, index: Int) = BigDecimal(d)
     override def visitInt64(d: Long, index: Int) = BigDecimal(d)
