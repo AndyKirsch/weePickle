@@ -65,4 +65,12 @@ class TestUtil[Api <: com.rallyhealth.weepickle.v0.Api](val api: Api){
       }
     }
   }
+
+  def parses[T: api.Reader](s: String*) = {
+    val strings = s.map(_.trim)
+
+    for (s <- strings) {
+        api.read[T](s)
+    }
+  }
 }

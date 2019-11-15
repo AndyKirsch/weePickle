@@ -1,5 +1,6 @@
 package com.rallyhealth.weepickle.v0.implicits
 
+import java.math.MathContext
 import java.net.URI
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -122,9 +123,17 @@ trait DefaultReaders extends com.rallyhealth.weepickle.v0.core.Types with Genera
       Util.parseIntegralNum(s, decIndex, expIndex, index).toLong
     }
   }
+  private val digitLimit = 100000
   implicit val BigIntReader: Reader[BigInt] = new SimpleReader[BigInt] {
     override def expectedMsg = "expected number or numeric string"
-    override def visitString(s: CharSequence, index: Int) = BigInt(s.toString)
+    override def visitString(s: CharSequence, index: Int) = {
+      if(s.length() > digitLimit) {
+        // Don't put the number in the exception otherwise trying to render it to a string could also cause problems
+        throw new NumberFormatException(s"Number too large with ${s.length} digits")
+      } else {
+        BigInt(s.toString)
+      }
+    }
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int) = BigInt(s.toString)
     override def visitInt32(d: Int, index: Int) = BigInt(d)
     override def visitInt64(d: Long, index: Int) = BigInt(d)
@@ -133,8 +142,12 @@ trait DefaultReaders extends com.rallyhealth.weepickle.v0.core.Types with Genera
   implicit val BigDecimalReader: Reader[BigDecimal] = new SimpleReader[BigDecimal] {
     override def expectedMsg = "expected number or numeric string"
     override def visitString(s: CharSequence, index: Int) = {
-      val str = s.toString
-      // two abuse cases: the exponential formatted one and the number as string case
+      if(s.length() > digitLimit) {
+        // Don't put the number in the exception otherwise trying to render it to a string could also cause problems
+        throw new NumberFormatException(s"Number too large with ${s.length} digits")
+      } else {
+        val str = s.toString
+        /* // two abuse cases: the exponential formatted one and the number as string case
       val maxAllowableDigits = 54 // Based on the interoperability information contained in RFC-8259 section 6
       val exponentialNotationIndex = str.indexOf('E') match {
         case -1 => str.indexOf('e')
@@ -145,8 +158,9 @@ trait DefaultReaders extends com.rallyhealth.weepickle.v0.core.Types with Genera
         throw new NumberFormatException("Exponential")
       val digitSplit = str.indexOf('.')
       if(str.length - digitSplit >= maxAllowableDigits)
-        throw new NumberFormatException("Digits")
-      BigDecimal(str)
+        throw new NumberFormatException("Digits")*/
+        BigDecimal(str)
+      }
     }
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int) = BigDecimal(s.toString)
     override def visitInt32(d: Int, index: Int) = BigDecimal(d)
