@@ -123,7 +123,7 @@ trait DefaultReaders extends com.rallyhealth.weepickle.v0.core.Types with Genera
       Util.parseIntegralNum(s, decIndex, expIndex, index).toLong
     }
   }
-  private val digitLimit = 100000
+  private val digitLimit = 10000
   implicit val BigIntReader: Reader[BigInt] = new SimpleReader[BigInt] {
     override def expectedMsg = "expected number or numeric string"
     override def visitString(s: CharSequence, index: Int) = {
@@ -147,18 +147,6 @@ trait DefaultReaders extends com.rallyhealth.weepickle.v0.core.Types with Genera
         throw new NumberFormatException(s"Number too large with ${s.length} digits")
       } else {
         val str = s.toString
-        /* // two abuse cases: the exponential formatted one and the number as string case
-      val maxAllowableDigits = 54 // Based on the interoperability information contained in RFC-8259 section 6
-      val exponentialNotationIndex = str.indexOf('E') match {
-        case -1 => str.indexOf('e')
-        case n => n
-      }
-      // The +1 is for the e itself
-      if(exponentialNotationIndex != -1 && Integer.parseInt(str.drop(exponentialNotationIndex + 1)) >= maxAllowableDigits)
-        throw new NumberFormatException("Exponential")
-      val digitSplit = str.indexOf('.')
-      if(str.length - digitSplit >= maxAllowableDigits)
-        throw new NumberFormatException("Digits")*/
         BigDecimal(str)
       }
     }

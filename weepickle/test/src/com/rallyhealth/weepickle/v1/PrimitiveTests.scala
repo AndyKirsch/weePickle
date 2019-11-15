@@ -56,9 +56,8 @@ object PrimitiveTests extends TestSuite {
           """ "23420744098430230498023841234712512315423127402740234" """)
       test("null") - rw(null: BigInt, "null")
       test("abuse cases") {
-        test("100k digits") - parses[BigInt](s""" "1${"0" * 99999}" """)
-        test("1 million digits") - abuseCase[BigInt](s""" "1${"0" * 999999}" """)
-   //     test("10 million digits") - abuseCase[BigInt](s""" "1${"0" * 9999999}" """)
+        test("10k digits") - parses[BigInt](s""" "1${"0" * 9999}" """)
+        test("100k digits") - abuseCase[BigInt](s""" "1${"0" * 99999}" """)
       }
     }
     test("BigDecimal"){
@@ -86,9 +85,8 @@ object PrimitiveTests extends TestSuite {
          */
 
         test("greater than max int exponential") -abuseCase[BigDecimal](s""" "1E${Integer.MAX_VALUE.toLong + 1}" """)
-        test("100k digits") - parses[BigDecimal](s""" "1${"0" * 99999}" """)
-        test("1 million digits") - abuseCase[BigDecimal](s""" "1${"0" * 999999}" """)
-       // test("10 million digits") - abuseCase[BigDecimal](s""" "1${"0" * 9999999}" """)
+        test("10k digits") - parses[BigInt](s""" "1${"0" * 9999}" """)
+        test("100k digits") - abuseCase[BigDecimal](s""" "1${"0" * 99999}" """)
         test("Not quite max int exponential") - parses[BigDecimal](s""" "1E${Integer.MAX_VALUE - 1}" """)
         // MathContext.UNLIMITED gives you unlimited precision normally you only get 128 bit decimal see [[BigDecimal.defaultMathContext]]
         test("amazingly small") - rw(BigDecimal("0.0000000000000000001", MathContext.UNLIMITED).pow(999))
