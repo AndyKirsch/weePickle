@@ -1,6 +1,5 @@
 package com.rallyhealth.weepickle.v0.implicits
 
-import java.math.MathContext
 import java.net.URI
 import java.util.UUID
 import java.util.concurrent.TimeUnit
